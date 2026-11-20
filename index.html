@@ -3,25 +3,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>鉄骨建方 3Dモデル確認資料（更新版）</title>
+    <title>鉄骨建方 安全対策 3D説明資料（更新版）</title>
     <style>
         :root{--bg:#f4f6f8;--panel:#ffffff;--ink:#1f2933;--muted:#6b7280;--line:#e5e7eb;--accent:#1e88e5;}
         *{box-sizing:border-box}
-        html,body{margin:0;height:100%;overflow:hidden;font-family:"Yu Gothic UI",sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+        html,body{margin:0;height:100%;overflow:hidden;font-family:"Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
         #app{display:grid;grid-template-columns:380px 1fr;grid-template-rows:100vh;height:100vh}
-        #side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh}
+        #side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;overflow:hidden}
         #side header{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
         #side header h1{font-size:15px;margin:0 0 4px;line-height:1.35}
         #side header .sub{font-size:12px;color:var(--muted)}
         #issues{overflow:auto;flex:1;padding:8px}
-        .card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 8px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-        .card .ttl{font-weight:700;font-size:13.5px;margin:2px 0 6px;line-height:1.35}
-        .meta{display:flex;gap:6px;flex-wrap:wrap}
+        .card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 8px;cursor:pointer;background:#fff;transition:box-shadow .15s}
+        .card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .card .ttl{font-weight:700;font-size:13.5px;margin:2px 0 4px;line-height:1.35}
+        .card .sum{font-size:12px;color:#374151;line-height:1.45}
+        .meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
         .chip{font-size:11px;border-radius:999px;padding:1px 8px;background:#eef2f7;color:#374151}
         #main{position:relative;background:#eee}
         #view{width:100%;height:100%;display:block}
     </style>
-    <!-- 3D表示用ライブラリ -->
+    <!-- 3Dライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -30,16 +32,20 @@
 <div id="app">
     <aside id="side">
         <header>
-            <h1>鉄骨建方 3Dモデル確認</h1>
-            <div class="sub">2FL.obj の構造確認</div>
+            <h1>鉄骨建方 安全対策 3D説明資料</h1>
+            <div class="sub">2FLレベル 構造・安全対策確認</div>
         </header>
         <div id="issues">
+            <!-- 対策内容を表示するカード -->
             <div class="card">
-                <div class="ttl">建物全体：2FLレベル</div>
-                <div class="meta">
-                    <span class="chip">3Dモデル: 2FL.obj</span>
-                    <span class="chip">ステータス: 読み込み中</span>
-                </div>
+                <div class="ttl">鉄骨組立て等作業主任者の配置</div>
+                <div class="sum">前面道路のクレーン脇に作業主任者を配置し、作業全体を直接指揮。</div>
+                <div class="meta"><span class="chip">対策案</span><span class="chip">2FL.obj</span></div>
+            </div>
+            <div class="card">
+                <div class="ttl">外周足場・転落防止策</div>
+                <div class="sum">2FL梁天端からの墜落防止のため、親綱の設置および手摺先行工法を確認。</div>
+                <div class="meta"><span class="chip">対策案</span><span class="chip">安全仮設</span></div>
             </div>
         </div>
     </aside>
@@ -53,33 +59,28 @@
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf4f6f8);
     
-    // カメラ設定
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100000);
-    camera.position.set(100, 100, 100);
+    camera.position.set(200, 200, 200);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // マウスコントロール（回転・ズーム）
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    // ライト設定
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
     dirLight.position.set(100, 200, 100);
     scene.add(dirLight);
 
-    // モデル読み込み
     const loader = new THREE.OBJLoader();
-    const fileName = '2FL.obj'; // あなたのファイル名
+    const fileName = '2FL.obj'; // GitHub上のファイル名
 
     loader.load(
         fileName,
         function (object) {
-            // モデルを中心へ配置し、カメラ位置を自動調整
             const box = new THREE.Box3().setFromObject(object);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
@@ -91,17 +92,12 @@
             camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
             camera.lookAt(0, 0, 0);
             controls.update();
-
-            console.log("Success: Model Loaded");
-            document.querySelector('.chip:last-child').textContent = "ステータス: 完了";
-            document.querySelector('.chip:last-child').style.background = "#e6f4ea";
+            console.log("Model Loaded Successfully");
         },
-        function (xhr) { 
-            console.log((xhr.loaded / xhr.total * 100) + '% 読み込み中');
-        },
+        undefined,
         function (error) {
-            console.error('Error Details:', error);
-            alert("エラー: '" + fileName + "' が読み込めません。GitHub上のファイル名を確認してください。");
+            console.error('Loading Error:', error);
+            alert("エラー: '" + fileName + "' を読み込めませんでした。ファイル名を確認してください。");
         }
     );
 
@@ -112,7 +108,6 @@
     }
     animate();
 
-    // 画面サイズ変更対応
     window.addEventListener('resize', () => {
         camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
