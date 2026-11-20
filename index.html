@@ -3,27 +3,26 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>鉄骨建方 安全対策 3D説明資料（更新版）</title>
+    <title>鉄骨建方 安全対策 3D説明資料</title>
     <style>
         :root{--bg:#f4f6f8;--panel:#ffffff;--ink:#1f2933;--muted:#6b7280;--line:#e5e7eb;--accent:#1e88e5;}
         *{box-sizing:border-box}
-        html,body{margin:0;height:100%;overflow:hidden;font-family:"Yu Gothic UI","Meiryo",sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
+        html,body{margin:0;height:100%;overflow:hidden;font-family:"Yu Gothic UI",sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
         #app{display:grid;grid-template-columns:380px 1fr;grid-template-rows:100vh;height:100vh}
-        #side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+        #side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh}
         #side header{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
-        #side header h1{font-size:15px;margin:0 0 4px;line-height:1.35}
-        #side header .sub{font-size:12px;color:var(--muted)}
+        #side header h1{font-size:15px;margin:0 0 4px}
         #issues{overflow:auto;flex:1;padding:8px}
-        .card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 8px;cursor:pointer;background:#fff;transition:box-shadow .15s}
-        .card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
-        .card .ttl{font-weight:700;font-size:13.5px;margin:2px 0 4px;line-height:1.35}
+        .card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 8px;cursor:pointer;background:#fff}
+        .card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(30,136,229,.1)}
+        .card .ttl{font-weight:700;font-size:13.5px;margin-bottom:4px}
         .card .sum{font-size:12px;color:#374151;line-height:1.45}
-        .meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-        .chip{font-size:11px;border-radius:999px;padding:1px 8px;background:#eef2f7;color:#374151}
+        #detail{border-top:1px solid var(--line);padding:12px 16px;background:#fbfcfd;min-height:150px}
+        #detail h2{font-size:14px;margin:0 0 8px}
+        .detail-content{font-size:13px;line-height:1.6}
         #main{position:relative;background:#eee}
-        #view{width:100%;height:100%;display:block}
+        #view{width:100%;height:100%}
     </style>
-    <!-- 3Dライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -32,87 +31,64 @@
 <div id="app">
     <aside id="side">
         <header>
-            <h1>鉄骨建方 安全対策 3D説明資料</h1>
-            <div class="sub">2FLレベル 構造・安全対策確認</div>
+            <h1>鉄骨建方 安全対策資料</h1>
         </header>
         <div id="issues">
-            <!-- 対策内容を表示するカード -->
-            <div class="card">
+            <!-- カードをクリックすると詳細が下に表示されます -->
+            <div class="card active" onclick="showDetail('主任者配置', '前面道路のクレーン脇に作業主任者を配置し、作業全体を直接指揮します。安衛則第517条に基づきます。')">
                 <div class="ttl">鉄骨組立て等作業主任者の配置</div>
-                <div class="sum">前面道路のクレーン脇に作業主任者を配置し、作業全体を直接指揮。</div>
-                <div class="meta"><span class="chip">対策案</span><span class="chip">2FL.obj</span></div>
+                <div class="sum">前面道路のクレーン脇に作業主任者を配置...</div>
             </div>
-            <div class="card">
-                <div class="ttl">外周足場・転落防止策</div>
-                <div class="sum">2FL梁天端からの墜落防止のため、親綱の設置および手摺先行工法を確認。</div>
-                <div class="meta"><span class="chip">対策案</span><span class="chip">安全仮設</span></div>
+            <div class="card" onclick="showDetail('フルハーネス使用', '高所作業者全員がフルハーネス型墜落制止用器具を着用。2丁掛けフックを徹底します。')">
+                <div class="ttl">墜落制止用器具の徹底</div>
+                <div class="sum">全員フルハーネス2丁掛けを使用。</div>
             </div>
         </div>
+        <div id="detail">
+            <h2>対策内容詳細</h2>
+            <div id="detail-text" class="detail-content">カードを選択してください。</div>
+        </div>
     </aside>
-    <main id="main">
-        <div id="view"></div>
-    </main>
+    <main id="main"><div id="view"></div></main>
 </div>
 
 <script>
+    // 詳細表示の切り替え
+    function showDetail(title, text) {
+        document.getElementById('detail-text').innerHTML = `<strong>${title}</strong><br>${text}`;
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
     const container = document.getElementById('view');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf4f6f8);
-    
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100000);
-    camera.position.set(200, 200, 200);
-
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
-
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
     dirLight.position.set(100, 200, 100);
     scene.add(dirLight);
 
     const loader = new THREE.OBJLoader();
-    const fileName = '2FL.obj'; // GitHub上のファイル名
+    const fileName = '2FL.obj'; 
 
-    loader.load(
-        fileName,
-        function (object) {
-            const box = new THREE.Box3().setFromObject(object);
-            const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-            
-            object.position.sub(center);
-            scene.add(object);
-
-            const maxDim = Math.max(size.x, size.y, size.z);
-            camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
-            camera.lookAt(0, 0, 0);
-            controls.update();
-            console.log("Model Loaded Successfully");
-        },
-        undefined,
-        function (error) {
-            console.error('Loading Error:', error);
-            alert("エラー: '" + fileName + "' を読み込めませんでした。ファイル名を確認してください。");
-        }
-    );
-
-    function animate() {
-        requestAnimationFrame(animate);
+    loader.load(fileName, function (object) {
+        const box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        object.position.sub(center);
+        scene.add(object);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
         controls.update();
-        renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
     });
+
+    function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+    animate();
 </script>
 </body>
 </html>
