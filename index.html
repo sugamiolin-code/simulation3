@@ -5,24 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>鉄骨建方 安全対策 3D説明資料</title>
     <style>
-        :root{--bg:#f4f6f8;--panel:#ffffff;--ink:#1f2933;--muted:#6b7280;--line:#e5e7eb;--accent:#1e88e5;}
-        *{box-sizing:border-box}
-        html,body{margin:0;height:100%;overflow:hidden;font-family:"Yu Gothic UI",sans-serif;color:var(--ink);background:var(--bg);font-size:14px}
-        #app{display:grid;grid-template-columns:380px 1fr;grid-template-rows:100vh;height:100vh}
-        #side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh}
-        #side header{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
-        #side header h1{font-size:15px;margin:0 0 4px}
-        #issues{overflow:auto;flex:1;padding:8px}
-        .card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 8px;cursor:pointer;background:#fff}
-        .card.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(30,136,229,.1)}
-        .card .ttl{font-weight:700;font-size:13.5px;margin-bottom:4px}
-        .card .sum{font-size:12px;color:#374151;line-height:1.45}
-        #detail{border-top:1px solid var(--line);padding:12px 16px;background:#fbfcfd;min-height:150px}
-        #detail h2{font-size:14px;margin:0 0 8px}
-        .detail-content{font-size:13px;line-height:1.6}
-        #main{position:relative;background:#eee}
-        #view{width:100%;height:100%}
+        :root {
+            --bg: #f4f6f8;
+            --panel: #ffffff;
+            --ink: #1f2933;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --accent: #1e88e5;
+            --accent2: #e53935;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            /* 提供されたフォント設定を統合 */
+            font-family: "Yu Gothic UI", "Meiryo", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+            font-size: 14px;
+        }
+
+        #app {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            grid-template-rows: 100vh;
+            height: 100vh;
+        }
+
+        #side {
+            background: var(--panel);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #side header {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        #side header h1 {
+            font-size: 15px;
+            margin: 0 0 4px;
+            line-height: 1.35;
+        }
+
+        #side header .sub {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        #issues {
+            overflow: auto;
+            flex: 1;
+            padding: 8px;
+        }
+
+        /* カードデザイン */
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 0 0 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: box-shadow .15s;
+        }
+
+        .card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        .card .src {
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .card .ttl {
+            font-weight: 700;
+            font-size: 13.5px;
+            margin: 0 0 4px;
+            line-height: 1.35;
+        }
+
+        .card .sum {
+            font-size: 12px;
+            color: #374151;
+            line-height: 1.45;
+            margin-bottom: 6px;
+        }
+
+        .meta {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            font-size: 11px;
+            border-radius: 999px;
+            padding: 1px 8px;
+            background: #eef2f7;
+            color: #374151;
+        }
+
+        /* アクセントカラー用のチップ例 */
+        .chip.important {
+            background: #ffebee;
+            color: var(--accent2);
+        }
+
+        #main {
+            position: relative;
+            background: #eee;
+        }
+
+        #view {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
     </style>
+    <!-- 3Dライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -31,43 +143,52 @@
 <div id="app">
     <aside id="side">
         <header>
-            <h1>鉄骨建方 安全対策資料</h1>
+            <h1>鉄骨建方 安全対策 3D説明資料</h1>
+            <div class="sub">2FLレベル 構造・安全対策確認</div>
         </header>
         <div id="issues">
-            <!-- カードをクリックすると詳細が下に表示されます -->
-            <div class="card active" onclick="showDetail('主任者配置', '前面道路のクレーン脇に作業主任者を配置し、作業全体を直接指揮します。安衛則第517条に基づきます。')">
+            <div class="card">
+                <div class="src">指導書 6-(1)</div>
                 <div class="ttl">鉄骨組立て等作業主任者の配置</div>
-                <div class="sum">前面道路のクレーン脇に作業主任者を配置...</div>
+                <div class="sum">前面道路のクレーン脇に作業主任者1名を配置し、作業全体を直接指揮。</div>
+                <div class="meta">
+                    <span class="chip">対策案</span>
+                    <span class="chip">3D要素 5</span>
+                </div>
             </div>
-            <div class="card" onclick="showDetail('フルハーネス使用', '高所作業者全員がフルハーネス型墜落制止用器具を着用。2丁掛けフックを徹底します。')">
-                <div class="ttl">墜落制止用器具の徹底</div>
-                <div class="sum">全員フルハーネス2丁掛けを使用。</div>
+            <div class="card">
+                <div class="src">指導書 6-(2)</div>
+                <div class="ttl">玉掛け技能講習修了者の配置</div>
+                <div class="sum">荷掛け（路上）1名・荷受け（北西隅）3名の計4名を配置。</div>
+                <div class="meta">
+                    <span class="chip">対策案</span>
+                    <span class="chip">3D要素 26</span>
+                    <span class="chip important">有資格者</span>
+                </div>
             </div>
-        </div>
-        <div id="detail">
-            <h2>対策内容詳細</h2>
-            <div id="detail-text" class="detail-content">カードを選択してください。</div>
         </div>
     </aside>
-    <main id="main"><div id="view"></div></main>
+    <main id="main">
+        <div id="view"></div>
+    </main>
 </div>
 
 <script>
-    // 詳細表示の切り替え
-    function showDetail(title, text) {
-        document.getElementById('detail-text').innerHTML = `<strong>${title}</strong><br>${text}`;
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    }
-
     const container = document.getElementById('view');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf4f6f8);
+    
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100000);
+    camera.position.set(200, 200, 200);
+
     const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
+
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
     dirLight.position.set(100, 200, 100);
@@ -84,11 +205,24 @@
         scene.add(object);
         const maxDim = Math.max(size.x, size.y, size.z);
         camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
+        camera.lookAt(0, 0, 0);
         controls.update();
+    }, undefined, function (error) {
+        console.error('An error happened while loading the OBJ file:', error);
     });
 
-    function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
     animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
 </script>
 </body>
 </html>
